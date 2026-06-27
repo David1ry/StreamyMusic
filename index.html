@@ -1138,12 +1138,27 @@
     function openOverlay(id) {
       document.getElementById(id + '-overlay').classList.add('active');
       document.body.style.overflow = 'hidden';
+      var hashMap = { 'licenses': 'licenses', 'terms': 'terms', 'cookies': 'cookies' };
+      if (hashMap[id]) window.location.hash = hashMap[id];
     }
 
     function closeOverlay(id) {
       document.getElementById(id + '-overlay').classList.remove('active');
       document.body.style.overflow = '';
+      var allowedHashes = ['#licenses', '#terms', '#cookies'];
+      if (allowedHashes.indexOf(window.location.hash) !== -1) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     }
+
+    // Open licenses on direct link (#licenses)
+    window.addEventListener('load', function() {
+      var hash = window.location.hash;
+      var allowed = { '#licenses': 'licenses', '#terms': 'terms', '#cookies': 'cookies' };
+      if (allowed[hash]) {
+        openOverlay(allowed[hash]);
+      }
+    });
 
     // Close on click outside and Escape key
     document.querySelectorAll('.overlay').forEach(function(overlay) {
