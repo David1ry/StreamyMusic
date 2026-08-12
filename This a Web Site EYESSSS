@@ -748,6 +748,86 @@
     .da-success h3 { font-size:1.2rem; font-weight:700; color:#fff; margin-bottom:.5rem; }
     .da-success p  { font-size:.88rem; color:#94a3b8; line-height:1.6; }
 
+
+    /* ── Support Overlay ── */
+    .support-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+    @media (max-width: 540px) { .support-grid { grid-template-columns: 1fr; } }
+
+    .support-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 1rem;
+      padding: 1.25rem 1.3rem;
+      cursor: pointer;
+      transition: all .25s ease;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      text-decoration: none;
+      color: inherit;
+    }
+    .support-card:hover {
+      background: rgba(99,102,241,.1);
+      border-color: rgba(99,102,241,.4);
+      transform: translateY(-2px);
+    }
+    .support-card.danger:hover {
+      background: rgba(239,68,68,.08);
+      border-color: rgba(239,68,68,.35);
+    }
+    .support-card-icon {
+      font-size: 1.4rem;
+      margin-bottom: .15rem;
+    }
+    .support-card-title {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .support-card.danger .support-card-title { color: #f87171; }
+    .support-card-desc {
+      font-size: .8rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .support-email-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      background: rgba(99,102,241,.07);
+      border: 1px solid rgba(99,102,241,.2);
+      border-radius: .75rem;
+      padding: .85rem 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .support-email-row span { font-size:.85rem; color:#a5b4fc; }
+    .support-email-copy {
+      flex-shrink: 0;
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(99,102,241,.4);
+      background: transparent;
+      color: #a5b4fc;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .support-email-copy:hover { background: rgba(99,102,241,.2); }
+    .support-divider {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #334155;
+      margin: 1.2rem 0 .8rem;
+    }
+
     /* --- Animations --- */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
@@ -1257,7 +1337,7 @@
     // Open licenses on direct link (#licenses)
     window.addEventListener('load', function() {
       var hash = window.location.hash;
-      var allowed = { '#licenses': 'licenses', '#terms': 'terms', '#cookies': 'cookies', '#delete-account': 'delete-account' };
+      var allowed = { '#licenses': 'licenses', '#terms': 'terms', '#cookies': 'cookies', '#delete-account': 'delete-account', '#support': 'support' };
       if (allowed[hash]) {
         openOverlay(allowed[hash]);
       }
@@ -1284,17 +1364,7 @@
 
     // Support email
     function showSupport() {
-      var email = 'support.streamymusic@gmail.com';
-      // Try to copy to clipboard
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(email).then(function() {
-          showToast('Email copied to clipboard: ' + email);
-        }).catch(function() {
-          window.location.href = 'mailto:' + email;
-        });
-      } else {
-        window.location.href = 'mailto:' + email;
-      }
+      openOverlay('support');
     }
 
     function showToast(msg) {
@@ -1395,6 +1465,76 @@
   </div>
 
 
+
+  <!-- SUPPORT OVERLAY -->
+  <div id="support-overlay" class="overlay overlay-dark">
+    <div class="overlay-header">
+      <span class="overlay-title">Support Center</span>
+      <button class="overlay-close-btn" onclick="closeOverlay('support')">✕ Close</button>
+    </div>
+    <div class="overlay-content">
+      <div style="max-width:580px;margin:0 auto;padding:1.5rem 0 3rem;">
+
+        <p style="color:#94a3b8;font-size:.9rem;line-height:1.65;margin-bottom:1.4rem;">
+          Need help with Streamy Music? Choose a topic below or email our support team directly.
+          We typically respond within a few minutes.
+        </p>
+
+        <!-- Email row -->
+        <div class="support-email-row">
+          <span>📧 &nbsp;support.streamymusic@gmail.com</span>
+          <button class="support-email-copy" onclick="supportCopyEmail()">Copy email</button>
+        </div>
+
+        <div class="support-divider">How can we help you?</div>
+
+        <div class="support-grid">
+
+          <button class="support-card" onclick="supportContact('bug')">
+            <div class="support-card-icon">🐛</div>
+            <div class="support-card-title">Report a Bug</div>
+            <div class="support-card-desc">Something isn't working as expected? Let us know and we'll fix it fast.</div>
+          </button>
+
+          <button class="support-card" onclick="supportContact('account')">
+            <div class="support-card-icon">👤</div>
+            <div class="support-card-title">Account Help</div>
+            <div class="support-card-desc">Issues with your account, login, or profile? We'll get you back in.</div>
+          </button>
+
+          <button class="support-card" onclick="supportContact('music')">
+            <div class="support-card-icon">🎵</div>
+            <div class="support-card-title">Music & Playback</div>
+            <div class="support-card-desc">Songs not playing, missing tracks, audio issues — we've got you.</div>
+          </button>
+
+          <button class="support-card" onclick="supportContact('feedback')">
+            <div class="support-card-icon">💡</div>
+            <div class="support-card-title">Feature Request</div>
+            <div class="support-card-desc">Have an idea to improve Streamy Music? We'd love to hear it.</div>
+          </button>
+
+          <button class="support-card" onclick="supportContact('billing')">
+            <div class="support-card-icon">💳</div>
+            <div class="support-card-title">Billing & Subscription</div>
+            <div class="support-card-desc">Questions about your plan, charges, or cancellations.</div>
+          </button>
+
+          <button class="support-card danger" onclick="closeOverlay('support'); openOverlay('delete-account');">
+            <div class="support-card-icon">🗑️</div>
+            <div class="support-card-title">Delete My Account</div>
+            <div class="support-card-desc">Permanently remove your account and all your data from Streamy Music.</div>
+          </button>
+
+        </div>
+
+        <p style="font-size:.78rem;color:#334155;text-align:center;margin-top:.5rem;">
+          Response time: usually under 10 minutes &nbsp;·&nbsp; Mon – Sun, 24 h
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- DELETE ACCOUNT OVERLAY -->
   <div id="delete-account-overlay" class="overlay overlay-dark">
     <div class="overlay-header">
@@ -1493,6 +1633,30 @@
         openOverlay('delete-account');
       }
     })();
+
+
+    function supportCopyEmail() {
+      var email = 'support.streamymusic@gmail.com';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(function() {
+          showToast('Email copied! Open your email app and paste it.');
+        });
+      } else {
+        window.location.href = 'mailto:' + email;
+      }
+    }
+
+    function supportContact(topic) {
+      var subjects = {
+        bug:      'Bug Report – Streamy Music',
+        account:  'Account Help – Streamy Music',
+        music:    'Music & Playback Issue – Streamy Music',
+        feedback: 'Feature Request – Streamy Music',
+        billing:  'Billing Question – Streamy Music'
+      };
+      var subject = encodeURIComponent(subjects[topic] || 'Support Request – Streamy Music');
+      window.location.href = 'mailto:support.streamymusic@gmail.com?subject=' + subject;
+    }
 
     function daoCopyLink() {
       var url = window.location.origin + window.location.pathname + '#delete-account';
