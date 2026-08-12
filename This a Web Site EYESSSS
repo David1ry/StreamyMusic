@@ -1010,6 +1010,356 @@
     </div>
   </main>
 
+
+  <!-- ══════════════════════════════════════
+       DELETE ACCOUNT SECTION + MODAL
+       Self-contained, no external dependencies
+  ══════════════════════════════════════ -->
+  <style>
+    .da2-section {
+      width: 100%;
+      padding: 3rem 2rem 4rem;
+      background: #020617;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+    }
+    .da2-inner { max-width: 500px; margin: 0 auto; }
+    .da2-label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #475569;
+      margin-bottom: .9rem;
+    }
+    .da2-heading {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: .5rem;
+    }
+    .da2-sub {
+      font-size: .85rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 1.6rem;
+    }
+    .da2-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .65rem 1.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(239,68,68,.4);
+      background: rgba(239,68,68,.07);
+      color: #f87171;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .25s ease;
+      font-family: inherit;
+    }
+    .da2-open-btn:hover {
+      background: rgba(239,68,68,.15);
+      border-color: rgba(239,68,68,.7);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px rgba(239,68,68,.2);
+    }
+
+    /* ── Modal ── */
+    .da2-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(6px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .da2-backdrop.da2-open { display: flex; }
+
+    .da2-modal {
+      background: #0b1526;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 1.25rem;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      scrollbar-width: thin;
+      scrollbar-color: #1e3a5f transparent;
+    }
+    .da2-modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.05);
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .da2-modal-close:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+    .da2-modal-icon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.1rem;
+    }
+    .da2-modal-icon svg {
+      width: 24px; height: 24px;
+      stroke: #f87171; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .da2-modal h2 {
+      font-size: 1.35rem; font-weight: 700;
+      color: #fff; margin-bottom: .4rem;
+      background: none; -webkit-text-fill-color: unset;
+      letter-spacing: normal;
+    }
+    .da2-modal p.da2-modal-sub {
+      font-size: .85rem; color: #64748b;
+      line-height: 1.65; margin-bottom: 1.6rem;
+    }
+    .da2-field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
+    .da2-field label {
+      font-size: .78rem; font-weight: 600;
+      color: #94a3b8; letter-spacing: .03em;
+    }
+    .da2-field label span { color: #f87171; }
+    .da2-input, .da2-textarea {
+      background: #0f1f35;
+      border: 1px solid #1e3a5f;
+      border-radius: .6rem;
+      padding: .7rem 1rem;
+      color: #e2e8f0;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      font-family: inherit;
+      width: 100%;
+    }
+    .da2-input:focus, .da2-textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+    }
+    .da2-input::placeholder, .da2-textarea::placeholder { color: #334155; }
+    .da2-textarea { resize: vertical; min-height: 150px; line-height: 1.6; }
+
+    .da2-counter {
+      font-size: .75rem; text-align: right;
+      color: #334155; margin-top: .25rem; transition: color .2s;
+    }
+    .da2-counter.ok   { color: #22c55e; }
+    .da2-counter.warn { color: #f59e0b; }
+
+    .da2-alert {
+      background: rgba(239,68,68,.07);
+      border: 1px solid rgba(239,68,68,.2);
+      border-radius: .6rem;
+      padding: .85rem 1rem;
+      font-size: .8rem;
+      color: #fca5a5;
+      line-height: 1.6;
+      margin: 1rem 0 1.2rem;
+    }
+    .da2-alert strong { color: #f87171; }
+
+    .da2-submit {
+      width: 100%;
+      padding: .8rem;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      color: #fff;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .25s;
+      box-shadow: 0 4px 16px rgba(220,38,38,.3);
+      font-family: inherit;
+    }
+    .da2-submit:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(220,38,38,.4);
+    }
+    .da2-submit:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .da2-success {
+      display: none;
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+    .da2-success-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.1rem;
+    }
+    .da2-success-icon svg {
+      width: 26px; height: 26px;
+      stroke: #22c55e; fill: none;
+      stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .da2-success h3 { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+    .da2-success p  { font-size: .85rem; color: #64748b; line-height: 1.65; }
+  </style>
+
+  <!-- Button Section -->
+  <div class="da2-section">
+    <div class="da2-inner">
+      <div class="da2-label">Account Management</div>
+      <div class="da2-heading">Want to leave Streamy Music?</div>
+      <p class="da2-sub">You can request permanent deletion of your account and all associated data at any time. Our team will assist you within minutes.</p>
+      <button class="da2-open-btn" onclick="da2Open()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+        Request Account Deletion
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Backdrop -->
+  <div class="da2-backdrop" id="da2Backdrop" onclick="da2BackdropClick(event)">
+    <div class="da2-modal" id="da2Modal">
+      <button class="da2-modal-close" onclick="da2Close()" title="Close">✕</button>
+
+      <!-- Form state -->
+      <div id="da2FormState">
+        <div class="da2-modal-icon">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+        <h2>Request Account Deletion</h2>
+        <p class="da2-modal-sub">
+          Fill in the form below. Our team at <strong style="color:#a5b4fc">support.streamymusic@gmail.com</strong>
+          will contact you within a few minutes to guide you through the final steps.
+        </p>
+
+        <form onsubmit="da2Submit(event)">
+          <div class="da2-field">
+            <label>Full Name <span>*</span></label>
+            <input class="da2-input" id="da2Name" type="text" placeholder="Your full name" required>
+          </div>
+          <div class="da2-field">
+            <label>Email Address <span>*</span></label>
+            <input class="da2-input" id="da2Email" type="email" placeholder="Email linked to your Streamy account" required>
+          </div>
+          <div class="da2-field">
+            <label>Account ID <span>*</span></label>
+            <input class="da2-input" id="da2ID" type="text" placeholder="Your Streamy Music account ID" required>
+          </div>
+          <div class="da2-field">
+            <label>Reason for Deletion <span>*</span> &nbsp;<small style="color:#334155;font-weight:400">(minimum 600 characters)</small></label>
+            <textarea class="da2-textarea" id="da2Reason" rows="6"
+              placeholder="Please explain in detail why you want to permanently delete your account. The more you share, the better we can help you or improve our service."
+              oninput="da2Count(this)"></textarea>
+            <div class="da2-counter" id="da2Counter">0 / 600 minimum</div>
+          </div>
+
+          <div class="da2-alert">
+            <strong>⚠️ This action is permanent.</strong> All your playlists, preferences, listening history,
+            and personal data will be <strong>permanently removed</strong> and cannot be recovered.
+          </div>
+
+          <button class="da2-submit" id="da2SubmitBtn" type="submit" disabled>
+            Submit Deletion Request
+          </button>
+        </form>
+      </div>
+
+      <!-- Success state -->
+      <div class="da2-success" id="da2Success">
+        <div class="da2-success-icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Request Sent Successfully!</h3>
+        <p>
+          Your deletion request has been sent to<br>
+          <strong style="color:#a5b4fc">support.streamymusic@gmail.com</strong><br><br>
+          Our team will contact you shortly with the next steps.<br>
+          Please check your inbox and spam folder.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function da2Open() {
+      document.getElementById('da2Backdrop').classList.add('da2-open');
+      document.body.style.overflow = 'hidden';
+    }
+    function da2Close() {
+      document.getElementById('da2Backdrop').classList.remove('da2-open');
+      document.body.style.overflow = '';
+    }
+    function da2BackdropClick(e) {
+      if (e.target === document.getElementById('da2Backdrop')) da2Close();
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') da2Close();
+    });
+
+    function da2Count(el) {
+      var len = el.value.length;
+      var ctr = document.getElementById('da2Counter');
+      var btn = document.getElementById('da2SubmitBtn');
+      if (len >= 600) {
+        ctr.textContent = len + ' characters ✓';
+        ctr.className = 'da2-counter ok';
+        btn.disabled = false;
+      } else {
+        ctr.textContent = len + ' / 600 minimum — ' + (600 - len) + ' more needed';
+        ctr.className = len > 400 ? 'da2-counter warn' : 'da2-counter';
+        btn.disabled = true;
+      }
+    }
+
+    function da2Submit(e) {
+      e.preventDefault();
+      var name   = document.getElementById('da2Name').value.trim();
+      var email  = document.getElementById('da2Email').value.trim();
+      var id     = document.getElementById('da2ID').value.trim();
+      var reason = document.getElementById('da2Reason').value.trim();
+      if (reason.length < 600) return;
+
+      var subject = encodeURIComponent('Account Deletion Request – ' + name);
+      var body = encodeURIComponent(
+        'ACCOUNT DELETION REQUEST\n' +
+        '========================\n\n' +
+        'Full Name : ' + name + '\n' +
+        'Email     : ' + email + '\n' +
+        'Account ID: ' + id   + '\n\n' +
+        'REASON FOR DELETION\n' +
+        '-------------------\n' +
+        reason + '\n\n' +
+        '========================\n' +
+        'Sent via Streamy Music – Delete Account page'
+      );
+
+      window.location.href = 'mailto:support.streamymusic@gmail.com?subject=' + subject + '&body=' + body;
+
+      setTimeout(function() {
+        document.getElementById('da2FormState').style.display = 'none';
+        document.getElementById('da2Success').style.display = 'block';
+      }, 700);
+    }
+  </script>
+
   <!-- FOOTER -->
   <footer>
     <div class="footer-inner">
